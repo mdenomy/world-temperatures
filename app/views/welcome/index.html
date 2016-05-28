@@ -23,7 +23,7 @@ body {
 <body>
 <script>
 
-var margin = {top: 20, right: 100, bottom: 40, left: 50},
+var margin = {top: 20, right: 100, bottom: 50, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -49,7 +49,8 @@ var yAxis = d3.svg.axis()
 var line = d3.svg.line()
     .interpolate("basis")
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.temperature); });
+    .y(function(d) { return y(d.temperature); })
+    .defined(function(d) { return d.temperature != null; });
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -57,7 +58,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("zonal_temperatures.csv", function(error, data) {
+d3.csv("seasonal_temperatures.csv", function(error, data) {
   if (error) throw error;
 
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Year"; }));
@@ -66,12 +67,11 @@ d3.csv("zonal_temperatures.csv", function(error, data) {
     d.date = +d.Year;
   });
 
-  console.log(data[0])
   var series = color.domain().map(function(name) {
     return {
       name: name,
       values: data.map(function(d) {
-        return {date: +d.Year, temperature: +d[name]/10};
+        return {date: +d.Year, temperature: d[name] != "" ? +d[name]/10 : null};
       })
     };
   });
@@ -103,22 +103,23 @@ d3.csv("zonal_temperatures.csv", function(error, data) {
       .style("text-anchor", "end")
       .text("Temperature (C)");
 
-  var city = svg.selectAll(".city")
+  var metric = svg.selectAll(".metric")
       .data(series)
     .enter().append("g")
       .attr("class", function(d) { return d.name; });
 
-  city.append("path")
+  metric.append("path")
       .attr("class", "line")
       .attr("d", function(d) { return line(d.values); })
       .style("stroke", function(d) { return color(d.name); });
 
-  city.append("text")
+  metric.append("text")
       .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
       .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
       .attr("x", 3)
       .attr("dy", ".35em")
-      .text(function(d) { return d.name; });
+      .text(function(d) { return d.name; })
+      .style("stroke", function(d) { return color(d.name); });
 });
 
 </script>
