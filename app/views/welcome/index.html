@@ -13,10 +13,6 @@ body {
   shape-rendering: crispEdges;
 }
 
-.x.axis path {
-  display: none;
-}
-
 .line {
   fill: none;
   stroke: steelblue;
@@ -27,13 +23,13 @@ body {
 <body>
 <script>
 
-var margin = {top: 20, right: 100, bottom: 30, left: 50},
+var margin = {top: 20, right: 100, bottom: 40, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var parseDate = d3.time.format("%Y").parse;
 
-var x = d3.time.scale()
+var x = d3.scale.linear()
     .range([0, width]);
 
 var y = d3.scale.linear()
@@ -43,6 +39,7 @@ var color = d3.scale.category10();
 
 var xAxis = d3.svg.axis()
     .scale(x)
+    .tickFormat(d3.format("d"))
     .orient("bottom");
 
 var yAxis = d3.svg.axis()
@@ -66,14 +63,15 @@ d3.csv("zonal_temperatures.csv", function(error, data) {
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Year"; }));
 
   data.forEach(function(d) {
-    d.date = +d.Year
+    d.date = +d.Year;
   });
 
+  console.log(data[0])
   var series = color.domain().map(function(name) {
     return {
       name: name,
       values: data.map(function(d) {
-        return {date: d.Year, temperature: +d[name]/10};
+        return {date: +d.Year, temperature: +d[name]/10};
       })
     };
   });
@@ -88,7 +86,12 @@ d3.csv("zonal_temperatures.csv", function(error, data) {
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+      .call(xAxis)
+    .append("text")
+      .attr("x", width/2)
+      .attr("dy", "4em")
+      .style("text-anchor", "end")
+      .text("Year");
 
   svg.append("g")
       .attr("class", "y axis")
