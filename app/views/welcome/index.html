@@ -6,6 +6,11 @@ body {
   font: 10px sans-serif;
 }
 
+p {
+  font: 12px sans-serif;
+  width: 800px;
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -19,11 +24,28 @@ body {
   stroke-width: 1.5px;
 }
 
+.legend {
+    font-size: 14px;
+}
+
 </style>
 <body>
+  <h1>Global and Hemispheric Monthly Means </h1>
+  <p>
+    This chart shows the global and hemispheric mean temperature deviation (C)
+    from a base period between 1951-1980.
+  </p>
+  <p>
+    The data for the chart is from the NASA
+    <a href="http://data.giss.nasa.gov/gistemp/" target="_blank">GISTEMP</a>
+    site.  In addition to the global and hemispheric data shown in the chart,
+    the raw data also includes deviation information broken down by latitude.
+    I chose to focus on the global and hemispheric data to show the overall
+    temperature deviations.
+  </p>
 <script>
 
-var margin = {top: 20, right: 100, bottom: 50, left: 50},
+var margin = {top: 20, right: 150, bottom: 150, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -58,7 +80,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("seasonal_temperatures.csv", function(error, data) {
+d3.csv("zonal_temperatures.csv", function(error, data) {
   if (error) throw error;
 
   color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Year"; }));
@@ -101,7 +123,7 @@ d3.csv("seasonal_temperatures.csv", function(error, data) {
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Temperature (C)");
+      .text("Deviation (C)");
 
   var metric = svg.selectAll(".metric")
       .data(series)
@@ -120,6 +142,28 @@ d3.csv("seasonal_temperatures.csv", function(error, data) {
       .attr("dy", ".35em")
       .text(function(d) { return d.name; })
       .style("stroke", function(d) { return color(d.name); });
+
+  // var legend = svg.append("g")
+  //     .attr("class", "legend")
+  //     .attr("width", 100)
+  //     .attr("height", 100)
+  //   .selectAll("g")
+  //     .data(color.domain().slice().reverse())
+  //   .enter().append("g")
+  //     .attr("transform", function(d, i) { return "translate(" + width + "," + i * 20 + ")"; });
+
+  // legend.append("rect")
+  //     .attr("width", 18)
+  //     .attr("height", 18)
+  //     .style("fill", color);
+
+  // legend.append("text")
+  //     .attr("x", 24)
+  //     .attr("y", 9)
+  //     .attr("dy", ".35em")
+  //     .text(function(d) { return d; })
+  //     .style("stroke", function(d) { return color(d); });
+
 });
 
 </script>
